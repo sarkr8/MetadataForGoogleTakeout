@@ -25,7 +25,7 @@ Coloca tus archivos de Google Takeout así:
 2. INSTALACIÓN DE DEPENDENCIAS
 -----------------------------------
 
-Solo necesitas Python y exiftool:
+Solo necesitas Vscode, Python y exiftool:
 
 - **Windows**
   - Descarga exiftool de https://exiftool.org/
