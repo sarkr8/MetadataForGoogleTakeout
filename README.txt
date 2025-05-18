@@ -46,7 +46,9 @@ Este script hace lo siguiente:
   ✓ Incrusta los metadatos originales (fecha, ubicación, etc.)
   ✓ Renombra la foto como: IMG_YYYYMMDD_HHMMSS.jpg
   ✓ Evita duplicados con sufijos tipo _01, _02
-  ✓ Copia todo a: con_metadatos/
+  ✓ Copia todo lo que tenga metadatos a: con_metadatos/
+  ✓ Copia todo lo que no tenga metadatos a: sin_metadatos/
+  ✓ hace un reporte final
 
 USO:
   python insertar_metadatos.py
