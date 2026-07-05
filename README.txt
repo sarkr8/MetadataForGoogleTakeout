@@ -1,89 +1,70 @@
-===================================
-RESTAURADOR DE METADATOS DE FOTOS GOOGLE TAKEOUT
-===================================
+# Google Takeout Photo Metadata Restorer & Deduplicator
 
-Autor: Hiram Martínez Tumalan  
-Fecha: 2025  
-Requiere: Python 3.8+, exiftool
+Herramienta de automatización basada en Python 3 y ExifTool diseñada para resolver la pérdida de metadatos en las exportaciones de Google Takeout. El sistema procesa los archivos JSON laterales (sidecar files), incrusta de forma nativa la información cronológica y geográfica en los archivos binarios de las imágenes, y ejecuta un pipeline de depuración de duplicados mediante análisis de hashes criptográficos.
 
-NOTA: Este repositorio contiene una versiom de exitool para windows 64 bits. 
-en caso de que tus sitema operativo sea linux o mac os debes buscarlo desde la pagina de https://exiftool.org/
------------------------------------
-1. ESTRUCTURA INICIAL ESPERADA
------------------------------------
+## Características Principales
 
-Coloca tus archivos de Google Takeout así:
+* Inyección Nativa de Metadatos: Recuperación e incrustación de fechas de captura (EXIF/IPTC) y coordenadas geográficas (GPS) mapeadas desde los esquemas JSON de Google.
+* Pipeline de Deduplicación Inteligente: Identificación de archivos duplicados mediante hashing criptográfico. El algoritmo compara la densidad de metadatos y la antigüedad del archivo para preservar de forma automática la versión con mayor integridad de datos.
+* Estandarización de Naming: Renombrado sistemático de archivos bajo el estándar de la industria: IMG_YYYYMMDD_HHMMSS.jpg, gestionando colisiones de nombres mediante sufijos incrementales controlados (_01, _02).
+* Operación Segura e Idempotente: Procesamiento no destructivo. Los archivos originales se segregan en estructuras de directorios aisladas sin alterar las fuentes de entrada.
 
-  TuCarpetaFotos/
-  ├── IMG_1234.jpg
-  ├── IMG_1234.jpg.json
-  ├── IMG_1235.jpg
-  ├── IMG_1235.jpg.json
-  └── ...
+---
 
------------------------------------
-2. INSTALACIÓN DE DEPENDENCIAS
------------------------------------
+## Stack Tecnológico y Dependencias
 
-Solo necesitas Vscode, Python y exiftool:
+* Lenguaje: Python 3.8+ (Librerías nativas: os, json, hashlib, shutil)
+* Core Engine: ExifTool by Phil Harvey (Utilidad CLI de bajo nivel para manipulación de metadatos binarios)
 
-- **Windows**
-  - Descarga exiftool de https://exiftool.org/
-  - Renombra a "exiftool.exe" y agrégalo al PATH del sistema
+### Instalación de ExifTool por Sistema Operativo
 
-- **MacOS**
-  - brew install exiftool
+El script interactúa directamente con la interfaz de línea de comandos de ExifTool. Asegúrate de tenerlo disponible en el entorno:
 
-- **Linux**
-  - sudo apt install libimage-exiftool-perl
+* Windows (64-bits): El repositorio incluye el binario precompilado para entornos Windows. Para uso global, se sugiere renombrar a exiftool.exe y añadirlo a las Variables de Entorno (PATH) del sistema.
+* macOS: Ejecutar "brew install exiftool" desde la terminal.
+* Linux (Debian/Ubuntu): Ejecutar "sudo apt update && sudo apt install libimage-exiftool-perl" desde la terminal.
 
------------------------------------
-3. SCRIPT 1: insertar_metadatos.py
------------------------------------
+---
 
-Este script hace lo siguiente:
-  ✓ Lee los archivos .json
-  ✓ Incrusta los metadatos originales (fecha, ubicación, etc.)
-  ✓ Renombra la foto como: IMG_YYYYMMDD_HHMMSS.jpg
-  ✓ Evita duplicados con sufijos tipo _01, _02
-  ✓ Copia todo lo que tenga metadatos a: con_metadatos/
-  ✓ Copia todo lo que no tenga metadatos a: sin_metadatos/
-  ✓ hace un reporte final
+## Arquitectura de Directorios y Workflow
 
-USO:
-  python insertar_metadatos.py
+### 1. Estado Inicial Esperado
+Los archivos extraídos de la suite de Google Takeout deben organizarse en un directorio raíz junto con los scripts de procesamiento:
 
------------------------------------
-4. SCRIPT 2: mover_duplicados.py
------------------------------------
+TuCarpetaFotos/
+├── insertar_metadatos.py
+├── mover_duplicados.py
+├── IMG_1234.jpg
+├── IMG_1234.jpg.json
+├── IMG_1235.jpg
+└── IMG_1235.jpg.json
 
-Este script:
-  ✓ Detecta duplicados por hash
-  ✓ Compara metadatos (fecha + si los tiene)
-  ✓ Conserva la mejor versión (con más metadatos y más antigua)
-  ✓ Mueve los duplicados a: revisar_duplicados/
+### 2. Ejecución del Pipeline de Procesamiento
 
-USO:
-  python mover_duplicados.py
+#### Paso A: Restauración y Clasificación
+El primer módulo parsea los esquemas JSON, reinyecta los metadatos y realiza una segregación inicial basada en el éxito de la operación. Se ejecuta con el comando: "python insertar_metadatos.py"
+* Resultados: Genera los directorios organizados /con_metadatos y /sin_metadatos, emitiendo un reporte analítico en consola al finalizar.
 
------------------------------------
-5. ORGANIZACIÓN FINAL
------------------------------------
+#### Paso B: Deduplicación Criptográfica
+El segundo módulo analiza el directorio resultante para eliminar redundancias físicas de almacenamiento basándose en firmas digitales únicas. Se ejecuta con el comando: "python mover_duplicados.py"
 
-Después de ejecutar ambos scripts:
+### 3. Organización Final del Workspace
+Tras completar la ejecución de los módulos, el espacio de trabajo se reestructura de la siguiente manera:
 
-  TuCarpetaFotos/
-  ├── con_metadatos/         <- Fotos limpias, con metadatos, renombradas
-  ├── revisar_duplicados/    <- Copias duplicadas no necesarias
-  ├── insertar_metadatos.py
-  ├── mover_duplicados.py
-  └── README.txt
+TuCarpetaFotos/
+├── con_metadatos/          # Archivos optimizados, con metadatos incrustados y renombrados
+├── revisar_duplicados/     # Copias redundantes aisladas para auditoría manual previa al purgado
+├── insertar_metadatos.py
+├── mover_duplicados.py
+└── README.md
 
------------------------------------
-6. NOTAS
------------------------------------
+---
 
-- El script nunca modifica los archivos originales.
-- Se recomienda revisar la carpeta revisar_duplicados/ antes de borrarla.
-- Puedes adaptar los scripts si tienes archivos en otros formatos o carpetas.
+## Consideraciones de Diseño e Ingeniería
 
+* Integridad de Datos: Los algoritmos de movimiento de archivos operan bajo confirmación de copia previa (shutil.copy2 / shutil.move) para evitar pérdidas de información ante interrupciones del sistema (pánicos de ejecución o fallos de energía).
+* Auditoría de Duplicados: La carpeta revisar_duplicados/ actúa como un búfer de seguridad. Se recomienda una inspección visual o validación de logs antes de proceder con el borrado físico definitivo de las estructuras redundantes.
+
+---
+
+**Desarrollado por:** Hiram Martínez  
