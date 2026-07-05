@@ -33,12 +33,18 @@ Para que el script pueda mapear correctamente la información, es estrictamente 
 
 Estructura requerida en el mismo directorio:
 
-TuCarpetaFotos/
+TuCarpetaFotos
+
 ├── insertar_metadatos.py     # Script de inyección de metadatos
+
 ├── mover_duplicados.py       # Script de deduplicación
+
 ├── IMG_1234.jpg             # Archivo de imagen
+
 ├── IMG_1234.jpg.json        # Archivo JSON lateral con los metadatos originales de Google
+
 ├── IMG_1235.jpg             # Archivo de imagen
+
 └── IMG_1235.jpg.json        # Archivo JSON lateral con los metadatos originales de Google
 
 ### 2. Ejecución del Pipeline de Procesamiento
@@ -53,11 +59,15 @@ El segundo módulo analiza el directorio resultante para eliminar redundancias f
 ### 3. Organización Final del Workspace
 Tras completar la ejecución de los módulos, el espacio de trabajo se reestructura de la siguiente manera:
 
-TuCarpetaFotos/
+TuCarpetaFotos
 ├── con_metadatos/          # Archivos optimizados, con metadatos incrustados y renombrados
+
 ├── revisar_duplicados/     # Copias redundantes aisladas para auditoría manual previa al purgado
+
 ├── insertar_metadatos.py
+
 ├── mover_duplicados.py
+
 └── README.md
 
 ---
