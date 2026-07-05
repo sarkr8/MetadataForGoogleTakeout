@@ -28,16 +28,18 @@ El script interactúa directamente con la interfaz de línea de comandos de Exif
 
 ## Arquitectura de Directorios y Workflow
 
-### 1. Estado Inicial Esperado
-Los archivos extraídos de la suite de Google Takeout deben organizarse en un directorio raíz junto con los scripts de procesamiento:
+### 1. Estado Inicial Esperado y Requisito de Ubicación
+Para que el script pueda mapear correctamente la información, es estrictamente obligatorio consolidar y colocar tanto los archivos de imagen (.jpg, .png, etc.) como sus archivos de metadatos correspondientes (.json) exactamente en la misma carpeta raíz, ubicados en el mismo nivel que los scripts de procesamiento. No deben estar en subcarpetas separadas.
+
+Estructura requerida en el mismo directorio:
 
 TuCarpetaFotos/
-├── insertar_metadatos.py
-├── mover_duplicados.py
-├── IMG_1234.jpg
-├── IMG_1234.jpg.json
-├── IMG_1235.jpg
-└── IMG_1235.jpg.json
+├── insertar_metadatos.py     # Script de inyección de metadatos
+├── mover_duplicados.py       # Script de deduplicación
+├── IMG_1234.jpg             # Archivo de imagen
+├── IMG_1234.jpg.json        # Archivo JSON lateral con los metadatos originales de Google
+├── IMG_1235.jpg             # Archivo de imagen
+└── IMG_1235.jpg.json        # Archivo JSON lateral con los metadatos originales de Google
 
 ### 2. Ejecución del Pipeline de Procesamiento
 
@@ -46,7 +48,7 @@ El primer módulo parsea los esquemas JSON, reinyecta los metadatos y realiza un
 * Resultados: Genera los directorios organizados /con_metadatos y /sin_metadatos, emitiendo un reporte analítico en consola al finalizar.
 
 #### Paso B: Deduplicación Criptográfica
-El segundo módulo analiza el directorio resultante para eliminar redundancias físicas de almacenamiento basándose en firmas digitales únicas. Se ejecuta con el comando: "python mover_duplicados.py"
+El segundo módulo analiza el directorio resultante para eliminar redundancias físicas de almacenamiento basándose en firmas digitales uniques. Se ejecuta con el comando: "python mover_duplicados.py"
 
 ### 3. Organización Final del Workspace
 Tras completar la ejecución de los módulos, el espacio de trabajo se reestructura de la siguiente manera:
@@ -68,3 +70,4 @@ TuCarpetaFotos/
 ---
 
 **Desarrollado por:** Hiram Martínez  
+**Contacto / Portafolio:** [Inserta tu enlace aquí]
